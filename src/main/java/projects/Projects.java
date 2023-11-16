@@ -12,7 +12,9 @@ public class Projects {
 	private List<String> operations = List.of(
 			"1) Add a project",
 			"2) List projects",
-			"3) Select a project"
+			"3) Select a project",
+			"4) Update project details",
+			"5) Delete a project"
 			);
 		// @formatter:on
 	private Scanner scanner = new Scanner(System.in);
@@ -44,6 +46,11 @@ public class Projects {
 				case 3:
 					selectProject();
 					break;
+				case 4:
+					updateProjectDetails();
+					break;
+				case 5:
+					deleteProject();
 
 				default:
 					System.out.println("\n" + selection + " is not a valid selection. Try again.");
@@ -54,6 +61,43 @@ public class Projects {
 			}
 		}
 
+	}
+
+	private void deleteProject() {
+		listProjects();
+		Integer projectId = getIntInput("Enter a project ID to select a project");
+		projectService.deleteProject(projectId);
+
+		System.out.println("Project with project ID " + projectId + " was deleted.");
+
+		if (Objects.nonNull(curProject) && curProject.getProjectId().equals(projectId)) {
+			curProject = null;
+		}
+
+	}
+
+	private void updateProjectDetails() {
+		if (curProject == null) {
+			System.out.println("\nPlease select a project.");
+			return;
+		}
+		String projectName = getStringInput("Enter the project name [" + curProject.getProjectName() + "]");
+		BigDecimal estimatedHours = getDecimalInput(
+				"Enter the estimated hours [" + curProject.getEstimatedHours() + "]");
+		BigDecimal actualHours = getDecimalInput("Enter the actual hours [" + curProject.getActualHours() + "]");
+		Integer projectDifficulty = getIntInput("Enter the difficulty [" + curProject.getDifficulty() + "]");
+		String projectNotes = getStringInput("Enter the notes [" + curProject.getNotes() + "]");
+
+		Project project = new Project();
+		project.setProjectId(curProject.getProjectId());
+		project.setProjectName(Objects.isNull(projectName) ? curProject.getProjectName() : projectName);
+		project.setEstimatedHours(Objects.isNull(estimatedHours) ? curProject.getEstimatedHours() : estimatedHours);
+		project.setActualHours(Objects.isNull(actualHours) ? curProject.getActualHours() : actualHours);
+		project.setDifficulty(Objects.isNull(projectDifficulty) ? curProject.getDifficulty() : projectDifficulty);
+		project.setNotes(Objects.isNull(projectNotes) ? curProject.getNotes() : projectNotes);
+
+		projectService.modifyProjectDetails(project);
+		curProject = projectService.fetchProjectById(curProject.getProjectId());
 	}
 
 	private void selectProject() {
@@ -152,7 +196,7 @@ public class Projects {
 		if (Objects.isNull(curProject)) {
 			System.out.println("\nYou are not working with a project.");
 		} else {
-			System.out.println("\nYou are owrking with project: " + curProject);
+			System.out.println("\nYou are working with project: " + curProject);
 		}
 	}
 
